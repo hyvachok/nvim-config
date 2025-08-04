@@ -1,6 +1,4 @@
-# 🚀 Modern Neovim Configuration
-
-A feature-rich, performance-optimized Neovim configuration built for modern development workflows. This config provides a complete IDE-like experience with support for multiple programming languages, intelligent code completion, and a beautiful user interface.
+# 🚀 Neovim Configuration
 
 ## ✨ Features
 
@@ -73,16 +71,6 @@ sudo apt update
 sudo apt install neovim
 ```
 
-#### Arch Linux
-```bash
-sudo pacman -S neovim
-```
-
-#### Windows (with Chocolatey)
-```powershell
-choco install neovim
-```
-
 ### 4. Install Required Tools
 ```bash
 # Install ripgrep for Telescope
@@ -91,12 +79,6 @@ brew install ripgrep
 
 # Ubuntu/Debian
 sudo apt install ripgrep
-
-# Arch Linux
-sudo pacman -S ripgrep
-
-# Windows
-choco install ripgrep
 ```
 
 ### 5. First Launch
@@ -234,14 +216,6 @@ nvim
 - Consider reducing `updatetime` in options.lua
 - Disable unused language servers in Mason
 
-## 🤝 Contributing
-
-Feel free to submit issues and enhancement requests! This configuration is designed to be a solid foundation that can be customized to your specific needs.
-
 ## 📄 License
 
 This configuration is open source and available under the [MIT License](LICENSE).
-
----
-
-⭐ If you find this configuration helpful, please consider giving it a star!
