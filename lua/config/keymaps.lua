@@ -1,0 +1,219 @@
+-- Кешируем lazy handler для производительности
+local lazy_handler
+local function map(mode, lhs, rhs, opts)
+  if not lazy_handler then
+    local ok, handler = pcall(require, "lazy.core.handler")
+    if ok then
+      lazy_handler = handler.handlers.keys
+    end
+  end
+  
+  -- do not create the keymap if a lazy keys handler exists
+  if lazy_handler and lazy_handler.active[lazy_handler.parse({ lhs, mode = mode }).id] then
+    return
+  end
+  
+  opts = opts or {}
+  opts.silent = opts.silent ~= false
+  if opts.remap and not vim.g.vscode then
+    opts.remap = nil
+  end
+  vim.keymap.set(mode, lhs, rhs, opts)
+end
+
+-- Better up/down
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+
+-- Move to window using the <ctrl> hjkl keys
+map("n", "<C-h>", "<C-w>h", { desc = "Go to left window", remap = true })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window", remap = true })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window", remap = true })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to right window", remap = true })
+
+-- Window splits
+map("n", "<leader>-", "<C-W>s", { desc = "Split window below" })
+map("n", "<leader>|", "<C-W>v", { desc = "Split window right" })
+map("n", "<leader>wd", "<C-W>c", { desc = "Delete window" })
+
+-- Resize window using <ctrl> arrow keys
+map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
+map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
+map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
+map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+
+-- Move Lines
+map("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move down" })
+map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
+map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move down" })
+map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
+map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
+map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
+
+-- Buffers
+map("n", "<S-h>", function()
+  if vim.fn.exists(":BufferLineCyclePrev") == 2 then
+    vim.cmd("BufferLineCyclePrev")
+  else
+    vim.cmd("bprevious")
+  end
+end, { desc = "Prev buffer" })
+map("n", "<S-l>", function()
+  if vim.fn.exists(":BufferLineCycleNext") == 2 then
+    vim.cmd("BufferLineCycleNext")
+  else
+    vim.cmd("bnext")
+  end
+end, { desc = "Next buffer" })
+map("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
+map("n", "<leader>bD", "<cmd>bdelete!<cr>", { desc = "Delete buffer (force)" })
+
+-- Tabs
+map("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
+map("n", "<leader><tab>f", "<cmd>tabfirst<cr>", { desc = "First Tab" })
+map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
+map("n", "<leader><tab>]", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
+map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+map("n", "<C-PageUp>", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+map("n", "<C-PageDown>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "gt", "<cmd>tabnext<cr>", { desc = "Next Tab" })
+map("n", "gT", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+
+-- Clear search with <esc>
+map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsearch" })
+
+-- Better search (LazyVim style)
+map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next search result" })
+map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result" })
+map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result" })
+map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev search result" })
+map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev search result" })
+map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev search result" })
+
+-- Save file
+map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save file" })
+
+-- Better indenting
+map("v", "<", "<gv")
+map("v", ">", ">gv")
+
+-- Lazy
+map("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
+
+-- New file
+map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
+
+-- Search (LazyVim style)
+map("n", "<leader><space>", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
+
+-- Git (using gitsigns)
+map("n", "<leader>gg", function()
+  if vim.fn.executable("lazygit") == 1 then
+    vim.cmd("!lazygit")
+  else
+    vim.notify("Lazygit not found", vim.log.levels.WARN)
+  end
+end, { desc = "Lazygit" })
+map("n", "<leader>Gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git Blame" })
+map("n", "<leader>GB", function()
+  require("gitsigns").blame_line({ full = true })
+end, { desc = "Git Blame (full)" })
+map("n", "<leader>Gd", "<cmd>Gitsigns diffthis<cr>", { desc = "Git Diff" })
+map("n", "<leader>GD", function()
+  require("gitsigns").diffthis("~")
+end, { desc = "Git Diff (~)" })
+map("n", "]h", "<cmd>Gitsigns next_hunk<cr>", { desc = "Next Hunk" })
+map("n", "[h", "<cmd>Gitsigns prev_hunk<cr>", { desc = "Prev Hunk" })
+map("n", "<leader>hs", "<cmd>Gitsigns stage_hunk<cr>", { desc = "Stage Hunk" })
+map("n", "<leader>hr", "<cmd>Gitsigns reset_hunk<cr>", { desc = "Reset Hunk" })
+map("v", "<leader>hs", ":Gitsigns stage_hunk<cr>", { desc = "Stage Hunk" })
+map("v", "<leader>hr", ":Gitsigns reset_hunk<cr>", { desc = "Reset Hunk" })
+map("n", "<leader>hS", "<cmd>Gitsigns stage_buffer<cr>", { desc = "Stage Buffer" })
+map("n", "<leader>hu", "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = "Undo Stage Hunk" })
+map("n", "<leader>hR", "<cmd>Gitsigns reset_buffer<cr>", { desc = "Reset Buffer" })
+map("n", "<leader>hp", "<cmd>Gitsigns preview_hunk<cr>", { desc = "Preview Hunk" })
+map("n", "<leader>hd", "<cmd>Gitsigns diffthis<cr>", { desc = "Diff This" })
+
+-- Quit
+map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
+
+-- Highlights under cursor
+map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
+
+-- Format keybinding is defined in lsp.lua
+
+-- Diagnostics
+map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
+map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
+map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+map("n", "]e", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end,
+  { desc = "Next Error" })
+map("n", "[e", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end,
+  { desc = "Prev Error" })
+map("n", "]w", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.WARN }) end,
+  { desc = "Next Warning" })
+map("n", "[w", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN }) end,
+  { desc = "Prev Warning" })
+
+-- Additional LSP keymaps (LazyVim style)
+map("n", "gD", vim.lsp.buf.declaration, { desc = "Goto Declaration" })
+map("n", "<leader>cR", function()
+  local old_name = vim.fn.expand("<cword>")
+  local new_name = vim.fn.input("New name: ", old_name)
+  if new_name ~= "" and new_name ~= old_name then
+    vim.lsp.buf.rename(new_name)
+  end
+end, { desc = "Rename File" })
+
+-- Toggle options (LazyVim style)
+map("n", "<leader>us", "<cmd>setlocal spell!<cr>", { desc = "Toggle Spelling" })
+map("n", "<leader>uw", "<cmd>set wrap!<cr>", { desc = "Toggle Word Wrap" })
+map("n", "<leader>ud", function()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+end, { desc = "Toggle Diagnostics" })
+map("n", "<leader>ul", "<cmd>set number!<cr>", { desc = "Toggle Line Numbers" })
+map("n", "<leader>ur", "<cmd>set relativenumber!<cr>", { desc = "Toggle Relative Numbers" })
+map("n", "<leader>uc", function()
+  vim.opt.conceallevel = vim.opt.conceallevel:get() == 0 and 2 or 0
+end, { desc = "Toggle Conceal Level" })
+map("n", "<leader>uf", function()
+  vim.g.autoformat = not vim.g.autoformat
+  if vim.g.autoformat then
+    vim.notify("Auto format enabled", vim.log.levels.INFO)
+  else
+    vim.notify("Auto format disabled", vim.log.levels.WARN)
+  end
+end, { desc = "Toggle Auto Format" })
+map("n", "<leader>uh", function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+end, { desc = "Toggle Inlay Hints" })
+map("n", "<leader>uT", "<cmd>TSToggle highlight<cr>", { desc = "Toggle Treesitter Highlight" })
+
+-- Spell checking
+map("n", "]s", "]s", { desc = "Next Spelling Error" })
+map("n", "[s", "[s", { desc = "Prev Spelling Error" })
+map("n", "z=", "z=", { desc = "Spelling Suggestions" })
+map("n", "zg", "zg", { desc = "Add to Dictionary" })
+map("n", "zw", "zw", { desc = "Mark as Bad Word" })
+
+-- Terminal (handled by toggleterm plugin)
+-- Additional terminal keymaps
+map("t", "<esc><esc>", "<c-\\><c-n>", { desc = "Enter Normal Mode" })
+map("n", "<leader>ft", function()
+  if pcall(require, "toggleterm") then
+    vim.cmd("ToggleTerm direction=float")
+  else
+    vim.cmd("terminal")
+  end
+end, { desc = "Terminal (float)" })
+map("n", "<leader>fT", function()
+  if pcall(require, "toggleterm") then
+    vim.cmd("ToggleTerm direction=horizontal")
+  else
+    vim.cmd("split | terminal")
+  end
+end, { desc = "Terminal (horizontal)" })
+
