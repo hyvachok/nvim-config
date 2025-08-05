@@ -11,12 +11,15 @@ return {
       require("go").setup({
         goimports = "gopls",
         gofmt = "gofumpt",
-        max_line_len = 120,
         tag_transform = false,
         test_dir = "",
         comment_placeholder = "   ",
         lsp_cfg = true,
         lsp_gofumpt = true,
+        -- Disable go.nvim's syntax highlighting to use treesitter
+        luasnip = true,
+        dap_debug = true,
+        dap_debug_gui = false,
         lsp_on_attach = function(client, bufnr)
           -- Custom keymaps for Go
           vim.keymap.set("n", "<leader>gr", "<cmd>GoRun<cr>", { desc = "Go Run", buffer = bufnr })

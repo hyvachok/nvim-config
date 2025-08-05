@@ -29,11 +29,6 @@ return {
       })
     end,
     opts = function()
-      local plugin = require("lazy.core.config").plugins["conform.nvim"]
-      if plugin.config ~= vim.NIL then
-        vim.notify("conform.nvim config is already set", vim.log.levels.ERROR)
-        return
-      end
       ---@class ConformOpts
       local opts = {
         -- LazyVim will use these options when formatting with the conform.nvim formatter

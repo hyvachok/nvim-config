@@ -93,38 +93,7 @@ return {
   --   end,
   -- },
 
-  -- Prettier formatting
-  {
-    "stevearc/conform.nvim",
-    ft = {
-      "typescript", "typescriptreact", "javascript", "javascriptreact",
-      "css", "scss", "less", "html", "json", "jsonc", "yaml", "markdown",
-      "graphql", "handlebars"
-    },
-    config = function()
-      require("conform").setup({
-        formatters_by_ft = {
-          javascript = { "prettier" },
-          javascriptreact = { "prettier" },
-          typescript = { "prettier" },
-          typescriptreact = { "prettier" },
-          css = { "prettier" },
-          scss = { "prettier" },
-          less = { "prettier" },
-          html = { "prettier" },
-          json = { "prettier" },
-          jsonc = { "prettier" },
-          yaml = { "prettier" },
-          markdown = { "prettier" },
-          graphql = { "prettier" },
-        },
-        format_on_save = {
-          timeout_ms = 500,
-          lsp_fallback = true,
-        },
-      })
-    end,
-  },
+  -- Prettier formatting is handled by formatting.lua
 
   -- React support
   {
