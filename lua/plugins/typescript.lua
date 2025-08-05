@@ -1,40 +1,21 @@
 return {
 
-  -- Enhanced TypeScript/JavaScript support (disabled to use standard ts_ls)
-  -- {
-  --   "yioneko/nvim-vtsls",
-  --   ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-  --   config = function()
-  --     require("vtsls").config({
-  --       settings = {
-  --         vtsls = {
-  --           enableMoveToFileCodeAction = true,
-  --           autoUseWorkspaceTsdk = true,
-  --           experimental = {
-  --             completion = {
-  --               enableServerSideFuzzyMatch = true,
-  --             },
-  --           },
-  --         },
-  --         typescript = {
-  --           updateImportsOnFileMove = { enabled = "always" },
-  --           suggest = {
-  --             completeFunctionCalls = true,
-  --           },
-  --           inlayHints = {
-  --             enumMemberValues = { enabled = true },
-  --             functionLikeReturnTypes = { enabled = true },
-  --             parameterNames = { enabled = "literals" },
-  --             parameterTypes = { enabled = true },
-  --             propertyDeclarationTypes = { enabled = true },
-  --             variableTypes = { enabled = false },
-  --           },
-  --         },
-  --       },
-  --     })
-  --   end,
-  -- },
-
+  -- Enhanced TypeScript/JavaScript support - lightweight configuration
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+    opts = {
+      settings = {
+        separate_diagnostic_server = true,
+        composite_mode = "separate_diagnostic",
+        tsserver_file_preferences = {
+          includeCompletionsForModuleExports = true,
+          includeCompletionsForImportStatements = true,
+        },
+      },
+    },
+  },
 
   -- Vitest test runner
   {

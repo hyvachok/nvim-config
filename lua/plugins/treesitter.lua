@@ -28,19 +28,35 @@ return {
         end,
       },
       ensure_installed = {
-        "bash", "c", "lua", "python", "javascript", "typescript", "json", "yaml", "markdown", "vim", "vimdoc",
+        "bash", "c", "lua", "python", "javascript", "typescript", "tsx", "json", "yaml", "markdown", "vim", "vimdoc",
         "go", "gomod", "gowork", "gosum",
-        "rust", "dockerfile", "toml", "ron", "regex"
+        "rust", "dockerfile", "toml", "ron", "regex", "html", "css", "scss"
       },
     },
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
       
-      -- Disable built-in vim syntax highlighting to avoid conflicts
-      vim.g.loaded_matchit = 1
-      vim.g.loaded_matchparen = 1
+      -- Ensure proper filetype detection for JavaScript files
+      vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+        pattern = {"*.js", "*.jsx", "*.mjs", "*.cjs"},
+        callback = function()
+          vim.bo.filetype = "javascript"
+        end,
+      })
       
-      -- Enable fallback syntax highlighting for large files when treesitter is disabled
+      vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+        pattern = {"*.ts", "*.tsx"},
+        callback = function()
+          local filename = vim.fn.expand("%:t")
+          if filename:match("%.tsx$") then
+            vim.bo.filetype = "typescriptreact"
+          else
+            vim.bo.filetype = "typescript"
+          end
+        end,
+      })
+      
+      -- Enable fallback syntax highlighting for large files when treesitter is disabled  
       vim.api.nvim_create_autocmd("BufReadPost", {
         pattern = "*",
         callback = function()

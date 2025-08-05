@@ -9,6 +9,8 @@ return {
         "stylua",
         "shfmt",
         "prettier",
+        "typescript-language-server",
+        "eslint_d",
       },
     },
     config = function(_, opts)
@@ -48,6 +50,7 @@ return {
         "lua_ls",
         "ts_ls",
         "pyright",
+        "eslint",
       },
     },
   },
@@ -113,7 +116,7 @@ return {
             },
           },
         },
-        ts_ls = {},
+        ts_ls = {}, -- Configured by typescript-tools.nvim
         pyright = {},
         -- rust_analyzer is handled by rustaceanvim
       },
@@ -121,11 +124,10 @@ return {
       -- return true if you don't want this server to be setup with lspconfig
       ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
       setup = {
-        -- example to setup with typescript.nvim
-        -- ts_ls = function(_, opts)
-        --   require("typescript").setup({ server = opts })
-        --   return true
-        -- end,
+        -- Use typescript-tools.nvim instead of ts_ls for better TypeScript support
+        ts_ls = function()
+          return true -- Skip default setup, handled by typescript-tools.nvim
+        end,
         -- Specify * to use this function as a fallback for any server
         -- ["*"] = function(server, opts) end,
       },
