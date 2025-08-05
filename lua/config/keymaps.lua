@@ -189,15 +189,30 @@ end, { desc = "Format file or range (in visual mode)" })
 
 -- Diagnostics
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
-map("n", "]e", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end,
+
+-- Helper function to close floating windows and navigate to diagnostics
+local function close_floating_and_goto_diagnostic(goto_func, opts)
+  return function()
+    -- Close any existing floating windows
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_config(win).relative ~= "" then
+        vim.api.nvim_win_close(win, false)
+      end
+    end
+    -- Navigate to diagnostic
+    goto_func(opts or {})
+  end
+end
+
+map("n", "]d", close_floating_and_goto_diagnostic(vim.diagnostic.goto_next), { desc = "Next Diagnostic" })
+map("n", "[d", close_floating_and_goto_diagnostic(vim.diagnostic.goto_prev), { desc = "Prev Diagnostic" })
+map("n", "]e", close_floating_and_goto_diagnostic(vim.diagnostic.goto_next, { severity = vim.diagnostic.severity.ERROR }),
   { desc = "Next Error" })
-map("n", "[e", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end,
+map("n", "[e", close_floating_and_goto_diagnostic(vim.diagnostic.goto_prev, { severity = vim.diagnostic.severity.ERROR }),
   { desc = "Prev Error" })
-map("n", "]w", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.WARN }) end,
+map("n", "]w", close_floating_and_goto_diagnostic(vim.diagnostic.goto_next, { severity = vim.diagnostic.severity.WARN }),
   { desc = "Next Warning" })
-map("n", "[w", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN }) end,
+map("n", "[w", close_floating_and_goto_diagnostic(vim.diagnostic.goto_prev, { severity = vim.diagnostic.severity.WARN }),
   { desc = "Prev Warning" })
 
 -- Additional LSP keymaps (LazyVim style)

@@ -193,3 +193,29 @@ vim.api.nvim_create_autocmd("VimEnter", {
     end
   end,
 })
+
+-- Auto-close diagnostic floating windows when changing buffers or moving cursor
+vim.api.nvim_create_autocmd({ "BufEnter", "BufLeave", "WinEnter", "WinLeave", "CursorMoved" }, {
+  group = augroup("close_diagnostic_floats"),
+  callback = function()
+    -- Close diagnostic floating windows when navigating away
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_is_valid(win) then
+        local config = vim.api.nvim_win_get_config(win)
+        -- Check if it's a floating window (relative positioning)
+        if config.relative ~= "" then
+          -- Check if it's likely a diagnostic window by looking at buffer content
+          local buf = vim.api.nvim_win_get_buf(win)
+          local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+          -- Close if it looks like diagnostic content (contains error/warning patterns)
+          for _, line in ipairs(lines) do
+            if line:match("Error:") or line:match("Warning:") or line:match("Hint:") or line:match("Info:") then
+              pcall(vim.api.nvim_win_close, win, false)
+              break
+            end
+          end
+        end
+      end
+    end
+  end,
+})
