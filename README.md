@@ -1,21 +1,26 @@
 # 🚀 Neovim Configuration
 
+> **LazyVim Compatible** - Optimized for maximum compatibility with LazyVim while maintaining performance and simplicity.
+
 ## ✨ Features
 
 ### 🔧 Core Functionality
-- **Plugin Management**: [lazy.nvim](https://github.com/folke/lazy.nvim) with lazy loading for optimal performance
-- **Language Server Protocol**: Full LSP support with [Mason](https://github.com/williamboman/mason.nvim) for automatic language server management
-- **Intelligent Completion**: [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) with multiple sources
-- **Fuzzy Finding**: [Telescope](https://github.com/nvim-telescope/telescope.nvim) for files, buffers, and live grep
+- **Plugin Management**: [lazy.nvim](https://github.com/folke/lazy.nvim) with optimized lazy loading
+- **Language Server Protocol**: Full LSP support with [Mason](https://github.com/williamboman/mason.nvim) and automatic server installation
+- **Intelligent Completion**: [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) with multiple sources and enhanced UI
+- **Code Formatting**: [conform.nvim](https://github.com/stevearc/conform.nvim) with auto-format on save
+- **Fuzzy Finding**: [Telescope](https://github.com/nvim-telescope/telescope.nvim) with fzf-native for blazing fast search
 - **File Explorer**: [Neo-tree](https://github.com/nvim-neo-tree/neo-tree.nvim) with Git integration
 - **Syntax Highlighting**: [Treesitter](https://github.com/nvim-treesitter/nvim-treesitter) for enhanced code highlighting
 
-### 🎨 User Interface
+### 🎨 User Interface  
 - **Color Scheme**: [Tokyo Night](https://github.com/folke/tokyonight.nvim) (Moon variant) with [Catppuccin](https://github.com/catppuccin/nvim) alternative
 - **Status Line**: [Lualine](https://github.com/nvim-lualine/lualine.nvim) with Git and diagnostic information
-- **Buffer Line**: [Bufferline](https://github.com/akinsho/bufferline.nvim) for tab-like buffer management
+- **Buffer Line**: [Bufferline](https://github.com/akinsho/bufferline.nvim) for tab-like buffer management  
 - **Start Screen**: [Alpha-nvim](https://github.com/goolord/alpha-nvim) for a welcoming dashboard
 - **Enhanced Navigation**: [Flash.nvim](https://github.com/folke/flash.nvim) for rapid cursor movement
+- **Notifications**: [nvim-notify](https://github.com/rcarriga/nvim-notify) for beautiful notifications
+- **Indent Guides**: [indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim) with active scope highlighting
 
 ### 💻 Language Support
 - **Rust**: Advanced support with [crates.nvim](https://github.com/saecki/crates.nvim) for dependency management
@@ -26,8 +31,37 @@
 ### 🛠️ Developer Tools
 - **Git Integration**: [Gitsigns](https://github.com/lewis6991/gitsigns.nvim) for inline Git status and actions
 - **Diagnostics**: [Trouble](https://github.com/folke/trouble.nvim) for enhanced error and warning display
-- **Code Formatting**: [Conform.nvim](https://github.com/stevearc/conform.nvim) for automatic code formatting
+- **Code Formatting**: [Conform.nvim](https://github.com/stevearc/conform.nvim) with comprehensive language support and auto-format
 - **Snippets**: [LuaSnip](https://github.com/L3MON4D3/LuaSnip) with [friendly-snippets](https://github.com/rafamadriz/friendly-snippets)
+- **Search & Replace**: [nvim-spectre](https://github.com/nvim-pack/nvim-spectre) for project-wide search and replace
+- **Session Management**: [persistence.nvim](https://github.com/folke/persistence.nvim) for automatic session restoration
+- **Word Highlighting**: [vim-illuminate](https://github.com/RRethy/vim-illuminate) automatically highlights word under cursor
+
+### 🚀 Performance Optimizations
+- **Lazy Loading**: All plugins are optimally lazy-loaded for fast startup times
+- **Smart Caching**: Enhanced caching configuration for better performance  
+- **Minimal Runtime**: Disabled unnecessary built-in plugins
+- **Efficient LSP**: Mason-lspconfig integration with on-demand server installation
+
+## 🔄 Migration from LazyVim
+
+This configuration is designed to be **fully compatible** with LazyVim, making migration seamless:
+
+### ✅ What's Compatible
+- **All keybindings** follow LazyVim conventions 
+- **Plugin structure** matches LazyVim organization
+- **LSP setup** uses the same patterns as LazyVim
+- **Formatting** uses conform.nvim like LazyVim
+- **Session management** uses persistence.nvim like LazyVim
+
+### 🚀 Easy Migration Steps
+1. **From LazyVim**: Simply clone this config - all your muscle memory will work!
+2. **To LazyVim**: Your knowledge transfers directly - same keys, same patterns
+
+### 🎯 Key Differences from LazyVim
+- **Lighter weight**: Fewer plugins for better performance
+- **Rust-focused**: Enhanced support for Rust development
+- **Simplified**: Less complexity while maintaining power
 
 ## 📋 Requirements
 
@@ -91,23 +125,14 @@ sudo apt install ripgrep
 ## 📖 Usage
 
 ### Quick Start
-- **Leader Key**: `<Space>` (spacebar)
+- **Leader Key**: `<Space>` (spacebar) - exactly like LazyVim
 - **File Explorer**: `<leader>e` to toggle Neo-tree
-- **Find Files**: `<leader>ff` or `<leader><space>` for Telescope file finder
+- **Find Files**: `<leader>ff` or `<leader><space>` for Telescope file finder  
 - **Search Text**: `<leader>/` for live grep
-- **Command Palette**: `<leader>sg` for Telescope live grep
+- **Format Code**: `<leader>fm` to format current file
+- **Search & Replace**: `<leader>sr` for project-wide search and replace
 
-### Language Server Setup
-Language servers are automatically installed via Mason when you open supported file types. You can also manually manage them:
-- `:Mason` - Open Mason UI to install/manage language servers
-- `:LspInfo` - View LSP status for current buffer
-- `:LspRestart` - Restart language server
-
-## ⌨️ Keybindings
-
-This configuration includes extensive keybindings for efficient editing. For a complete list of all available keybindings, see [KEYBINDINGS.md](./KEYBINDINGS.md).
-
-### Essential Shortcuts
+### Essential LazyVim-Compatible Shortcuts
 | Key | Action |
 |-----|--------|
 | `<leader>e` | Toggle file explorer |
@@ -116,10 +141,38 @@ This configuration includes extensive keybindings for efficient editing. For a c
 | `<leader>fb` | Find buffers |
 | `<leader>ca` | Code actions |
 | `<leader>cr` | Rename symbol |
-| `<leader>fm` | Format document |
+| `<leader>fm` | Format document |  
+| `<leader>sr` | Search & replace |
+| `<leader>xx` | Show diagnostics |
+| `<leader>bd` | Delete buffer |
+| `<leader>qs` | Restore session |
 | `K` | Show hover documentation |
 | `gd` | Go to definition |
 | `gr` | Go to references |
+
+### Language Server Setup
+Language servers are automatically installed via Mason when you open supported file types. You can also manually manage them:
+- `:Mason` - Open Mason UI to install/manage language servers
+- `:LspInfo` - View LSP status for current buffer
+- `:LspRestart` - Restart language server
+
+### Code Formatting
+This configuration uses **conform.nvim** (same as LazyVim) for formatting:
+- **Auto-format on save** is enabled by default
+- `:FormatDisable` - Disable auto-formatting
+- `:FormatEnable` - Re-enable auto-formatting
+- `<leader>fm` - Manual format current file
+
+### Session Management
+Sessions are automatically saved and restored using **persistence.nvim**:
+- Sessions save automatically when you exit Neovim
+- `<leader>qs` - Restore last session
+- `<leader>ql` - Load last session
+- `<leader>qd` - Don't save current session
+
+## ⌨️ Keybindings
+
+This configuration uses **exactly the same keybindings as LazyVim** for seamless migration. For a complete list of all available keybindings, see [KEYBINDINGS.md](./KEYBINDINGS.md).
 
 ## 🛠️ Customization
 

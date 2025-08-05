@@ -7,7 +7,7 @@ return {
         opts = {
             ensure_installed = {
                 "stylua",
-                "shfmt",
+                "shfmt", 
                 "prettier",
             },
         },
@@ -37,6 +37,19 @@ return {
                 ensure_installed()
             end
         end,
+    },
+
+    -- Mason LSP config
+    {
+        "williamboman/mason-lspconfig.nvim",
+        dependencies = { "mason.nvim" },
+        opts = {
+            ensure_installed = {
+                "lua_ls",
+                "ts_ls", 
+                "pyright",
+            },
+        },
     },
 
     -- LSP Configuration

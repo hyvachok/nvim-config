@@ -224,9 +224,21 @@ map("n", "<leader>uf", function()
     end
 end, { desc = "Toggle Auto Format" })
 map("n", "<leader>uh", function()
-    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+    if vim.lsp.inlay_hint then
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+    end
 end, { desc = "Toggle Inlay Hints" })
 map("n", "<leader>uT", "<cmd>TSToggle highlight<cr>", { desc = "Toggle Treesitter Highlight" })
+
+-- LazyVim-style window management
+map("n", "<leader>ww", "<C-W>p", { desc = "Other window" })
+map("n", "<leader>wd", "<C-W>c", { desc = "Delete window" })
+map("n", "<leader>w-", "<C-W>s", { desc = "Split window below" })
+map("n", "<leader>w|", "<C-W>v", { desc = "Split window right" })
+
+-- Better search navigation 
+map("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
 
 -- Spell checking
 map("n", "]s", "]s", { desc = "Next Spelling Error" })
