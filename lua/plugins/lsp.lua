@@ -182,7 +182,11 @@ return {
             local have_mason, mlsp = pcall(require, "mason-lspconfig")
             local all_mslp_servers = {}
             if have_mason then
-                all_mslp_servers = vim.tbl_keys(require("mason-lspconfig.mappings.server").lspconfig_to_package)
+                -- Try the new API first, fall back to empty table if not available
+                local ok, servers = pcall(mlsp.get_available_servers)
+                if ok and servers then
+                    all_mslp_servers = servers
+                end
             end
 
             local ensure_installed = {} ---@type string[]

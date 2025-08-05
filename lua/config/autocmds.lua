@@ -179,3 +179,17 @@ vim.api.nvim_create_autocmd("FileType", {
         end
     end,
 })
+
+-- Auto-open Neo-tree when opening a directory
+vim.api.nvim_create_autocmd("VimEnter", {
+    group = augroup("neotree_autoopen"),
+    callback = function()
+        local arg = vim.fn.argv(0)
+        if arg and vim.fn.isdirectory(arg) == 1 then
+            -- We're opening a directory, so open neo-tree and show it
+            vim.schedule(function()
+                require("neo-tree.command").execute({ action = "show", dir = arg })
+            end)
+        end
+    end,
+})
