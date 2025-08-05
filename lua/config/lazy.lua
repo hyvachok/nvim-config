@@ -26,12 +26,28 @@ require("lazy").setup({
         version = false, -- always use the latest git commit
     },
     install = { colorscheme = { "tokyonight", "habamax" } },
-    checker = { enabled = false }, -- отключена автопроверка для лучшей производительности
+    checker = { 
+        enabled = true, -- Enable auto-checking for updates 
+        notify = false, -- Don't notify about updates (less intrusive)
+        frequency = 3600, -- Check once per hour
+    },
+    change_detection = {
+        enabled = true,
+        notify = false, -- Don't notify about config changes
+    },    
     performance = {
+        cache = {
+            enabled = true,
+        },
+        reset_packpath = true, -- reset the package path to improve startup time
         rtp = {
+            reset = true, -- reset the runtime path to improve startup time
             -- disable some rtp plugins
             disabled_plugins = {
                 "gzip",
+                "matchit",
+                "matchparen",
+                "netrwPlugin",
                 "tarPlugin",
                 "tohtml",
                 "tutor",

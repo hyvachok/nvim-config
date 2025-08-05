@@ -5,6 +5,11 @@ return {
         cmd = "Telescope",
         dependencies = {
             "nvim-lua/plenary.nvim",
+            {
+                "nvim-telescope/telescope-fzf-native.nvim",
+                build = "make",
+                enabled = vim.fn.executable("make") == 1,
+            },
         },
         keys = {
             { "<leader>ff",      "<cmd>Telescope find_files<cr>",             desc = "Find Files" },
@@ -18,23 +23,114 @@ return {
             { "<leader>fR",      "<cmd>Telescope oldfiles cwd_only=true<cr>", desc = "Recent (cwd)" },
             { "<leader>Gc",      "<cmd>Telescope git_commits<cr>",            desc = "Git commits" },
             { "<leader>Gs",      "<cmd>Telescope git_status<cr>",             desc = "Git status" },
+            -- LSP
+            { "gd",              "<cmd>Telescope lsp_definitions<cr>",        desc = "Goto Definition" },
+            { "gr",              "<cmd>Telescope lsp_references<cr>",         desc = "References" },
+            { "gI",              "<cmd>Telescope lsp_implementations<cr>",    desc = "Goto Implementation" },
+            { "gy",              "<cmd>Telescope lsp_type_definitions<cr>",   desc = "Goto Type Definition" },
+            -- Search
+            { "<leader>sa",      "<cmd>Telescope autocommands<cr>",           desc = "Auto Commands" },
+            { "<leader>sb",      "<cmd>Telescope current_buffer_fuzzy_find<cr>", desc = "Buffer" },
+            { "<leader>sc",      "<cmd>Telescope command_history<cr>",        desc = "Command History" },
+            { "<leader>sC",      "<cmd>Telescope commands<cr>",               desc = "Commands" },
+            { "<leader>sd",      "<cmd>Telescope diagnostics bufnr=0<cr>",    desc = "Document diagnostics" },
+            { "<leader>sD",      "<cmd>Telescope diagnostics<cr>",            desc = "Workspace diagnostics" },
+            { "<leader>sh",      "<cmd>Telescope help_tags<cr>",              desc = "Help Pages" },
+            { "<leader>sH",      "<cmd>Telescope highlights<cr>",             desc = "Search Highlight Groups" },
+            { "<leader>sk",      "<cmd>Telescope keymaps<cr>",                desc = "Key Maps" },
+            { "<leader>sM",      "<cmd>Telescope man_pages<cr>",              desc = "Man Pages" },
+            { "<leader>sm",      "<cmd>Telescope marks<cr>",                  desc = "Jump to Mark" },
+            { "<leader>so",      "<cmd>Telescope vim_options<cr>",            desc = "Options" },
+            { "<leader>sR",      "<cmd>Telescope resume<cr>",                 desc = "Resume" },
         },
-        opts = {},
+        opts = function()
+            local actions = require("telescope.actions")
+            
+            local open_with_trouble = function(...)
+                return require("trouble.sources.telescope").open(...)
+            end
+            local add_to_trouble = function(...)
+                return require("trouble.sources.telescope").add(...)
+            end
+            
+            return {
+                defaults = {
+                    prompt_prefix = " ",
+                    selection_caret = " ",
+                    -- open files in the first window that is an actual file.
+                    -- use the current window if no other window is available.
+                    get_selection_window = function()
+                        local wins = vim.api.nvim_list_wins()
+                        table.insert(wins, 1, vim.api.nvim_get_current_win())
+                        for _, win in ipairs(wins) do
+                            local buf = vim.api.nvim_win_get_buf(win)
+                            if vim.bo[buf].buftype == "" then
+                                return win
+                            end
+                        end
+                        return 0
+                    end,
+                    mappings = {
+                        i = {
+                            ["<c-t>"] = open_with_trouble,
+                            ["<a-t>"] = add_to_trouble,
+                            ["<C-Down>"] = actions.cycle_history_next,
+                            ["<C-Up>"] = actions.cycle_history_prev,
+                            ["<C-f>"] = actions.preview_scrolling_down,
+                            ["<C-b>"] = actions.preview_scrolling_up,
+                        },
+                        n = {
+                            ["q"] = actions.close,
+                            ["<c-t>"] = open_with_trouble,
+                            ["<a-t>"] = add_to_trouble,
+                        },
+                    },
+                },
+                pickers = {
+                    find_files = {
+                        find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
+                    },
+                },
+            }
+        end,
+        config = function(_, opts)
+            require("telescope").setup(opts)
+            -- Enable telescope fzf native, if installed
+            pcall(require("telescope").load_extension, "fzf")
+        end,
     },
 
     -- Trouble
     {
         "folke/trouble.nvim",
         cmd = "Trouble",
-        keys = {
-            { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",                        desc = "Diagnostics (Trouble)" },
-            { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",           desc = "Buffer Diagnostics (Trouble)" },
-            { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>",                desc = "Symbols (Trouble)" },
-            { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ... (Trouble)" },
-            { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                            desc = "Location List (Trouble)" },
-            { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                             desc = "Quickfix List (Trouble)" },
+        opts = {
+            modes = {
+                preview_float = {
+                    mode = "diagnostics",
+                    preview = {
+                        type = "float",
+                        relative = "editor",
+                        border = "rounded",
+                        title = "Preview",
+                        title_pos = "center",
+                        position = { 0, -2 },
+                        size = { width = 0.3, height = 0.3 },
+                        zindex = 200,
+                    },
+                },
+            },
         },
-        opts = {},
+        keys = {
+            { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
+            { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
+            { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+            { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ... (Trouble)" },
+            { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
+            { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
+            { "[q", function() require("trouble").prev({skip_groups = true, jump = true}) end, desc = "Previous trouble/quickfix item" },
+            { "]q", function() require("trouble").next({skip_groups = true, jump = true}) end, desc = "Next trouble/quickfix item" },
+        },
     },
 
     -- Todo comments
@@ -63,7 +159,39 @@ return {
         keys = {
             { "<leader>db", function() require("dap").toggle_breakpoint() end,             desc = "Toggle Breakpoint" },
             { "<leader>dc", function() require("dap").continue() end,                      desc = "Continue" },
-            { "<leader>da", function() require("dap").continue({ before = get_args }) end, desc = "Run with Args" },
+            { "<leader>da", function() 
+                local function get_args()
+                    local co = coroutine.running()
+                    if co then
+                        return coroutine.create(function()
+                            local args = {}
+                            local i = 1
+                            while true do
+                                local arg = vim.fn.input("Argument " .. i .. ": ")
+                                if arg == "" then
+                                    break
+                                end
+                                table.insert(args, arg)
+                                i = i + 1
+                            end
+                            return args
+                        end)
+                    else
+                        local args = {}
+                        local i = 1
+                        while true do
+                            local arg = vim.fn.input("Argument " .. i .. ": ")
+                            if arg == "" then
+                                break
+                            end
+                            table.insert(args, arg)
+                            i = i + 1
+                        end
+                        return args
+                    end
+                end
+                require("dap").continue({ before = get_args }) 
+            end, desc = "Run with Args" },
             { "<leader>dC", function() require("dap").run_to_cursor() end,                 desc = "Run to Cursor" },
             { "<leader>dg", function() require("dap").goto_() end,                         desc = "Go to line (no execute)" },
             { "<leader>di", function() require("dap").step_into() end,                     desc = "Step Into" },
@@ -128,6 +256,9 @@ return {
         dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-treesitter/nvim-treesitter",
+            "rouge8/neotest-rust",
+            "nvim-neotest/neotest-go",
+            "marilari88/neotest-vitest",
         },
         keys = {
             { "<leader>tt", function() require("neotest").run.run(vim.fn.expand("%")) end,                      desc = "Run File" },
@@ -141,16 +272,16 @@ return {
         opts = function()
             return {
                 adapters = {
-                    require("neotest-rust") {
+                    require("neotest-rust")({
                         args = { "--no-capture" },
                         dap_adapter = "lldb",
-                    },
-                    require("neotest-go") {
+                    }),
+                    require("neotest-go")({
                         experimental = {
                             test_table = true,
                         },
                         args = { "-count=1", "-timeout=60s" },
-                    },
+                    }),
                     require("neotest-vitest"),
                 },
             }

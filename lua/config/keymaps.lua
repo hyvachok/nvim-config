@@ -67,8 +67,23 @@ map("n", "<S-l>", function()
         vim.cmd("bnext")
     end
 end, { desc = "Next buffer" })
-map("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
-map("n", "<leader>bD", "<cmd>bdelete!<cr>", { desc = "Delete buffer (force)" })
+map("n", "<leader>bd", function()
+    local bd = require("mini.bufremove").delete
+    if vim.bo.modified then
+        local choice = vim.fn.confirm(("Save changes to %q?"):format(vim.fn.bufname()), "&Yes\n&No\n&Cancel")
+        if choice == 1 then -- Yes
+            vim.cmd.write()
+            bd(0)
+        elseif choice == 2 then -- No
+            bd(0, true)
+        end
+    else
+        bd(0)
+    end
+end, { desc = "Delete buffer" })
+map("n", "<leader>bD", function()
+    require("mini.bufremove").delete(0, true)
+end, { desc = "Delete buffer (force)" })
 
 -- Tabs
 map("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
@@ -147,7 +162,24 @@ map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
 -- Highlights under cursor
 map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
 
--- Format keybinding is defined in lsp.lua
+-- Format keybinding 
+map("n", "<leader>fm", function()
+    local conform = require("conform")
+    conform.format({ 
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 1000,
+    })
+end, { desc = "Format Document" })
+
+map({ "n", "v" }, "<leader>mp", function()
+    local conform = require("conform")
+    conform.format({
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 1000,
+    })
+end, { desc = "Format file or range (in visual mode)" })
 
 -- Diagnostics
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })

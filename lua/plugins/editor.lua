@@ -8,8 +8,7 @@ return {
             "nvim-tree/nvim-web-devicons",
             "MunifTanjim/nui.nvim",
         },
-        lazy = false,
-        priority = 1000,
+        cmd = "Neotree",
         keys = {
             { "<leader>e",  "<cmd>Neotree toggle<cr>",              desc = "Explorer" },
             { "<leader>E",  "<cmd>Neotree toggle dir=getcwd()<cr>", desc = "Explorer (cwd)" },
@@ -167,77 +166,5 @@ return {
         end,
     },
 
-    -- Simple session management using built-in Neovim sessions
-    {
-        dir = ".", -- dummy plugin entry for session management
-        name = "simple-sessions",
-        config = function()
-            local sessions_dir = vim.fn.stdpath("data") .. "/sessions/"
-            vim.fn.mkdir(sessions_dir, "p")
 
-            -- Function to get session file path for current directory
-            local function get_session_file()
-                local cwd = vim.fn.getcwd()
-                local session_name = cwd:gsub("/", "%%")
-                return sessions_dir .. session_name .. ".vim"
-            end
-
-            -- Auto-save session on exit
-            vim.api.nvim_create_autocmd("VimLeavePre", {
-                callback = function()
-                    local session_file = get_session_file()
-                    vim.notify("Saving session to: " .. session_file, vim.log.levels.INFO)
-                    vim.cmd("mksession! " .. vim.fn.fnameescape(session_file))
-                end,
-            })
-
-            -- Auto-restore session on startup
-            vim.api.nvim_create_autocmd("VimEnter", {
-                callback = function()
-                    local argc = vim.fn.argc()
-                    local cwd = vim.fn.getcwd()
-                    local config_dir = vim.fn.stdpath("config")
-
-                    vim.notify("Session autocmd triggered: argc=" .. argc .. " cwd=" .. cwd, vim.log.levels.INFO)
-
-                    -- Restore session only if:
-                    -- 1. Single argument is "." (opening directory)
-                    -- 2. Not in config directory
-                    local should_restore = (argc == 1 and vim.fn.argv(0) == ".")
-
-                    if should_restore and cwd ~= config_dir then
-                        local session_file = get_session_file()
-                        if vim.fn.filereadable(session_file) == 1 then
-                            -- Quick session restore without delays
-                            vim.g.alpha_disable = true
-                            vim.cmd("source " .. vim.fn.fnameescape(session_file))
-                            vim.cmd("Neotree show")
-                            vim.g.alpha_disable = false
-                        else
-                            -- No session, just open Neo-tree
-                            vim.cmd("Neotree show")
-                        end
-                    end
-                end,
-                nested = true,
-            })
-
-            -- Manual session commands
-            vim.keymap.set("n", "<leader>qs", function()
-                local session_file = get_session_file()
-                if vim.fn.filereadable(session_file) == 1 then
-                    vim.cmd("source " .. vim.fn.fnameescape(session_file))
-                    vim.notify("Session loaded from: " .. session_file)
-                else
-                    vim.notify("No session file found: " .. session_file, vim.log.levels.WARN)
-                end
-            end, { desc = "Restore Session" })
-
-            vim.keymap.set("n", "<leader>qS", function()
-                local session_file = get_session_file()
-                vim.cmd("mksession! " .. vim.fn.fnameescape(session_file))
-                vim.notify("Session saved to: " .. session_file)
-            end, { desc = "Save Session" })
-        end,
-    },
 }
