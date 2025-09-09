@@ -205,15 +205,4 @@ return {
   -- UI components
   { "MunifTanjim/nui.nvim",        lazy = true },
 
-  -- A pretty list for diagnostics
-  {
-    "folke/trouble.nvim",
-    cmd = { "Trouble" },
-    opts = {},
-    keys = {
-      { "<leader>xx", "<cmd>TroubleToggle<cr>", desc = "Toggle Trouble" },
-      { "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics" },
-      { "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics" },
-    },
-  },
 }

@@ -217,12 +217,13 @@
 | Key | Action |
 |-----|--------|
 | `<leader>xx` | Diagnostics (Trouble) |
+| `<leader>xd` | Document diagnostics |
+| `<leader>xw` | Workspace diagnostics |
 | `<leader>xX` | Buffer diagnostics |
-| `<leader>xw` | Workspace Diagnostics (Trouble) |
 | `<leader>cs` | Symbols |
 | `<leader>cl` | LSP references |
-| `<leader>xt` | Todo (Trouble) |
-| `<leader>xT` | Todo/Fix/Fixme |
+| `<leader>xt` | Todo (Trouble v3) |
+| `<leader>xT` | Todo/Fix/Fixme (Trouble v3) |
 
 ### Toggles
 | Key | Action |
@@ -250,7 +251,9 @@
 |-----|--------|
 | `<leader>l` | Open Lazy |
 | `<leader>fn` | New file |
-| `<leader>qq` | Quit all |
-| `<leader>qs` | Restore session |
-| `<leader>qS` | Save session |
+| `<leader>qq` | Quit all (saves session) |
+| `<leader>qS` | Save session (`:SessionSave`) |
+| `<leader>qs` | Restore session (`:SessionRestore`) |
+| `<leader>qD` | Delete session (`:SessionDelete`) |
+| `<leader>qQ` | Quit without saving session |
 | `q` | Close (help/quickfix windows) |

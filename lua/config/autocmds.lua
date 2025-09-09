@@ -123,8 +123,15 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.wrap = true
     vim.opt_local.spell = true
     -- Defer opening folds to ensure it runs after session restore and treesitter parsing
+    -- Open all folds in the same buffer that triggered the event.
+    -- Use normal! to avoid invoking plugin mappings (e.g. neo-tree maps 'z').
+    local buf = vim.api.nvim_get_current_buf()
     vim.schedule(function()
-      vim.cmd("normal zR")
+      if vim.api.nvim_buf_is_valid(buf) then
+        vim.api.nvim_buf_call(buf, function()
+          pcall(vim.cmd, "silent! normal! zR")
+        end)
+      end
     end)
   end,
 })

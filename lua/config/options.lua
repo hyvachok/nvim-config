@@ -61,3 +61,7 @@ vim.opt.virtualedit = "block"
 vim.opt.wildmode = "longest:full,full"
 vim.opt.winminwidth = 5
 vim.opt.wrap = false
+
+-- Enable classic Vim syntax and filetype plugins (simple, robust fallback)
+vim.cmd([[filetype plugin indent on]])
+vim.cmd([[syntax enable]])

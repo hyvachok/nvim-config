@@ -168,6 +168,17 @@ map("n", "<leader>hd", "<cmd>Gitsigns diffthis<cr>", { desc = "Diff This" })
 -- Quit
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
 
+-- Sessions (auto-session)
+-- Commands provided by rmagatti/auto-session: SessionSave/SessionRestore/SessionDelete
+map("n", "<leader>qS", "<cmd>SessionSave<cr>", { desc = "Save session" })
+map("n", "<leader>qs", "<cmd>SessionRestore<cr>", { desc = "Restore session" })
+map("n", "<leader>qD", "<cmd>SessionDelete<cr>", { desc = "Delete session" })
+map("n", "<leader>qQ", function()
+  -- one-off quit without saving the session
+  vim.g.auto_session_enabled = false
+  vim.cmd("qa")
+end, { desc = "Quit without saving session" })
+
 -- Highlights under cursor
 map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
 

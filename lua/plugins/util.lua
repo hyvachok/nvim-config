@@ -46,6 +46,8 @@ return {
     config = function()
       require("auto-session").setup({
         log_level = "error",
+        auto_restore_enabled = true,
+        auto_save_enabled = true, -- save on quit by default
         auto_session_suppress_dirs = { "~//", "~/Projects", "~/Downloads", "/" },
         post_restore_cmds = { "Neotree show" }, -- Explicitly show neo-tree after session restore
       })
