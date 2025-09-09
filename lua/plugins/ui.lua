@@ -81,12 +81,12 @@ return {
     opts = function()
       local dashboard = require("alpha.themes.dashboard")
       local logo = [[
-           ██╗      █████╗ ███████╗██╗   ██╗██╗   ██╗██╗███╗   ███╗          Z
-           ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝██║   ██║██║████╗ ████║      Z
-           ██║     ███████║  ███╔╝  ╚████╔╝ ██║   ██║██║██╔████╔██║   z
-           ██║     ██╔══██║ ███╔╝    ╚██╔╝  ╚██╗ ██╔╝██║██║╚██╔╝██║ z
-           ███████╗██║  ██║███████╗   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║
-           ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
+██████╗ ███████╗███╗   ███╗██╗██████╗ ██╗   ██╗██╗███╗   ███╗
+██╔══██╗██╔════╝████╗ ████║██║██╔══██╗╚██╗ ██╔╝██║████╗ ████║
+██║  ██║█████╗  ██╔████╔██║██║██║  ██║ ╚████╔╝ ██║██╔████╔██║
+██║  ██║██╔══╝  ██║╚██╔╝██║██║██║  ██║  ╚██╔╝  ██║██║╚██╔╝██║
+██████╔╝███████╗██║ ╚═╝ ██║██║██████╔╝   ██║   ██║██║ ╚═╝ ██║
+╚═════╝ ╚══════╝╚═╝     ╚═╝╚═╝╚═════╝    ╚═╝   ╚═╝╚═╝     ╚═╝
       ]]
 
       dashboard.section.header.val = vim.split(logo, "\n")
@@ -127,15 +127,15 @@ return {
 
       require("alpha").setup(dashboard.opts)
 
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "LazyVimStarted",
-        callback = function()
-          local stats = require("lazy").stats()
-          local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-          dashboard.section.footer.val = "⚡ Neovim loaded " .. stats.count .. " plugins in " .. ms .. "ms"
-          pcall(vim.cmd.AlphaRedraw)
-        end,
-      })
+            vim.api.nvim_create_autocmd("User", {
+                pattern = "LazyVimStarted",
+                callback = function()
+                    local stats = require("lazy").stats()
+                    local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+                    dashboard.section.footer.val = "⚡ Neovim loaded " .. stats.count .. " plugins in " .. ms .. "ms"
+                    pcall(vim.cmd.AlphaRedraw)
+                end,
+            })
     end,
   },
 
@@ -204,4 +204,16 @@ return {
 
   -- UI components
   { "MunifTanjim/nui.nvim",        lazy = true },
+
+  -- A pretty list for diagnostics
+  {
+    "folke/trouble.nvim",
+    cmd = { "Trouble" },
+    opts = {},
+    keys = {
+      { "<leader>xx", "<cmd>TroubleToggle<cr>", desc = "Toggle Trouble" },
+      { "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics" },
+      { "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics" },
+    },
+  },
 }

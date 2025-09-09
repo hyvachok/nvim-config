@@ -178,7 +178,9 @@
 |-----|--------|
 | `<C-/>` | Toggle terminal |
 | `<leader>ft` | Terminal (floating) |
-| `<leader>fT` | Terminal (horizontal) |
+| `<leader>fT` | Open terminal (horizontal split) |
+
+
 | `<esc><esc>` | Normal mode (in terminal) |
 
 ## UI
@@ -216,6 +218,7 @@
 |-----|--------|
 | `<leader>xx` | Diagnostics (Trouble) |
 | `<leader>xX` | Buffer diagnostics |
+| `<leader>xw` | Workspace Diagnostics (Trouble) |
 | `<leader>cs` | Symbols |
 | `<leader>cl` | LSP references |
 | `<leader>xt` | Todo (Trouble) |

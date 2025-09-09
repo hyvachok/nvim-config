@@ -129,6 +129,9 @@ map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
 
 -- Search (LazyVim style)
 map("n", "<leader><space>", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
+map("n", "<leader>sw", "<cmd>Telescope live_grep<cr>", { desc = "Search Word" })
+map("n", "<leader>sb", "<cmd>Telescope buffers<cr>", { desc = "Search Buffers" })
+map("n", "<leader>sk", "<cmd>Telescope keymaps<cr>", { desc = "Search Keymaps" })
 
 -- Git (using gitsigns)
 map("n", "<leader>gg", function()

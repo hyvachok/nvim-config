@@ -58,7 +58,7 @@ This configuration is designed to be **fully compatible** with LazyVim, making m
 - **Plugin structure** matches LazyVim organization
 - **LSP setup** uses the same patterns as LazyVim
 - **Formatting** uses conform.nvim like LazyVim
-- **Session management** uses persistence.nvim like LazyVim
+- **Session management** uses auto-session
 
 ### 🚀 Easy Migration Steps
 
@@ -307,3 +307,4 @@ nvim
 ## 📄 License
 
 This configuration is open source and available under the [MIT License](LICENSE).
+e](LICENSE).

@@ -42,14 +42,14 @@ return {
 
   -- Session management
   {
-    "folke/persistence.nvim",
-    event = "BufReadPre",
-    opts = { options = vim.opt.sessionoptions:get() },
-    keys = {
-      { "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
-      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-      { "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
-    },
+    "rmagatti/auto-session",
+    config = function()
+      require("auto-session").setup({
+        log_level = "error",
+        auto_session_suppress_dirs = { "~//", "~/Projects", "~/Downloads", "/" },
+        post_restore_cmds = { "Neotree show" }, -- Explicitly show neo-tree after session restore
+      })
+    end,
   },
 
   -- Library used by other plugins
@@ -59,7 +59,7 @@ return {
   {
     "stevearc/dressing.nvim",
     lazy = true,
-    init = function()
+    init = function ()
       ---@diagnostic disable-next-line: duplicate-set-field
       vim.ui.select = function(...)
         require("lazy").load({ plugins = { "dressing.nvim" } })
@@ -104,35 +104,35 @@ return {
   },
 
   -- Active indent guide and indent text objects
-  {
-    "echasnovski/mini.indentscope",
-    version = false, -- wait till new 0.7.0 release to put it back on semver
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      symbol = "│",
-      options = { try_as_border = true },
-    },
-    init = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = {
-          "help",
-          "alpha",
-          "dashboard",
-          "neo-tree",
-          "Trouble",
-          "trouble",
-          "lazy",
-          "mason",
-          "notify",
-          "toggleterm",
-          "lazyterm",
-        },
-        callback = function()
-          vim.b.miniindentscope_disable = true
-        end,
-      })
-    end,
-  },
+  -- {
+  --   "echasnovski/mini.indentscope",
+  --   version = false, -- wait till new 0.7.0 release to put it back on semver
+  --   event = { "BufReadPost", "BufNewFile" },
+  --   opts = {
+  --     symbol = "│",
+  --     options = { try_as_border = true },
+  --   },
+  --   init = function ()
+  --     vim.api.nvim_create_autocmd("FileType", {
+  --       pattern = {
+  --         "help",
+  --         "alpha",
+  --         "dashboard",
+  --         "neo-tree",
+  --         "Trouble",
+  --         "trouble",
+  --         "lazy",
+  --         "mason",
+  --         "notify",
+  --         "toggleterm",
+  --         "lazyterm",
+  --       },
+  --       callback = function ()
+  --         vim.b.miniindentscope_disable = true
+  --       end,
+  --     })
+  --   end,
+  -- },
 
   -- Automatically highlights other instances of the word under your cursor
   {
@@ -145,7 +145,7 @@ return {
         providers = { "lsp" },
       },
     },
-    config = function(_, opts)
+    config = function (_, opts)
       require("illuminate").configure(opts)
 
       local function map(key, dir, buffer)
@@ -159,7 +159,7 @@ return {
 
       -- also set it after loading ftplugins, since a lot overwrite [[ and ]]
       vim.api.nvim_create_autocmd("FileType", {
-        callback = function()
+        callback = function ()
           local buffer = vim.api.nvim_get_current_buf()
           map("]]", "next", buffer)
           map("[[", "prev", buffer)
@@ -175,13 +175,14 @@ return {
   -- Buffer remove
   {
     "echasnovski/mini.bufremove",
+    lazy = true,
     keys = {
       {
         "<leader>bd",
-        function()
+        function ()
           local bd = require("mini.bufremove").delete
           if vim.bo.modified then
-            local choice = vim.fn.confirm(("Save changes to %q?"):format(vim.fn.bufname()), "&Yes\n&No\n&Cancel")
+            local choice = vim.fn.confirm(("Save changes to %q?" ):format(vim.fn.bufname()), "&Yes\n&No\n&Cancel")
             if choice == 1 then -- Yes
               vim.cmd.write()
               bd(0)
@@ -196,7 +197,7 @@ return {
       },
       {
         "<leader>bD",
-        function()
+        function ()
           require("mini.bufremove").delete(0, true)
         end,
         desc = "Delete Buffer (Force)",
@@ -204,4 +205,3 @@ return {
     },
   },
 }
-
