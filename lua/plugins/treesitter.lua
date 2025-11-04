@@ -20,6 +20,10 @@ return {
           if ok and stats and stats.size > max_filesize then
             return true
           end
+          -- Disable treesitter for helm files - use vim-helm syntax instead
+          if lang == "helm" then
+            return true
+          end
         end,
       },
       indent = {

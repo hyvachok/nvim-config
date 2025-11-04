@@ -75,6 +75,7 @@ return {
           json = { "prettier" },
           jsonc = { "prettier" },
           yaml = { "prettier" },
+          helm = { "prettier" }, -- Helm templates (YAML with Go templates)
           markdown = { "prettier" },
           graphql = { "prettier" },
           handlebars = { "prettier" },

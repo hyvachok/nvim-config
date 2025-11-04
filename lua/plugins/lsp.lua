@@ -50,6 +50,8 @@ return {
         "ts_ls",
         "pyright",
         "eslint",
+        "helm_ls",
+        "yamlls",
       },
     },
   },
@@ -126,6 +128,14 @@ return {
         },
         ts_ls = {}, -- Configured by typescript-tools.nvim
         pyright = {},
+        helm_ls = {
+          -- Ensure helm_ls only works with helm filetype
+          filetypes = { "helm" },
+        },
+        yamlls = {
+          -- Exclude helm files from yamlls (helm_ls handles them)
+          filetypes = { "yaml", "yml" },
+        },
         -- rust_analyzer is handled by rustaceanvim
       },
       -- you can do any additional lsp server setup here
@@ -187,6 +197,24 @@ return {
           capabilities = vim.deepcopy(capabilities),
         }, servers[server] or {})
 
+        -- Prevent yamlls from attaching to helm files
+        if server == "yamlls" then
+          server_opts.on_new_config = function(new_config, root_dir)
+            -- Override get_language_id to exclude helm files
+            local original_get_language_id = new_config.get_language_id
+            new_config.get_language_id = function(_, bufnr)
+              bufnr = bufnr or vim.api.nvim_get_current_buf()
+              if vim.bo[bufnr].filetype == "helm" then
+                return nil -- Don't attach to helm files
+              end
+              if original_get_language_id then
+                return original_get_language_id(_, bufnr)
+              end
+              return "yaml"
+            end
+          end
+        end
+
         if opts.setup[server] then
           if opts.setup[server](server, server_opts) then
             return
@@ -226,6 +254,7 @@ return {
       if have_mason then
         mlsp.setup({ ensure_installed = ensure_installed, handlers = { setup } })
       end
+
 
       -- LSP keymaps
       vim.api.nvim_create_autocmd("LspAttach", {
