@@ -1,6 +1,11 @@
--- Кешируем lazy handler для производительности
+-- ============================================================================
+-- Keymap Helper with Lazy.nvim Integration (from AstroNvim)
+-- ============================================================================
+
+-- Cache lazy handler for performance
 local lazy_handler
 local function map(mode, lhs, rhs, opts)
+  -- Lazy load the lazy handler only when needed
   if not lazy_handler then
     local ok, handler = pcall(require, "lazy.core.handler")
     if ok then
@@ -8,9 +13,12 @@ local function map(mode, lhs, rhs, opts)
     end
   end
 
-  -- do not create the keymap if a lazy keys handler exists
-  if lazy_handler and lazy_handler.active[lazy_handler.parse({ lhs, mode = mode }).id] then
-    return
+  -- Do not create the keymap if a lazy keys handler exists
+  if lazy_handler then
+    local keys = lazy_handler.parse({ lhs, mode = mode })
+    if keys and lazy_handler.active[keys.id] then
+      return
+    end
   end
 
   opts = opts or {}
@@ -20,6 +28,10 @@ local function map(mode, lhs, rhs, opts)
   end
   vim.keymap.set(mode, lhs, rhs, opts)
 end
+
+-- ============================================================================
+-- Movement & Navigation
+-- ============================================================================
 
 -- Better up/down
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
@@ -44,15 +56,21 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
--- Move Lines
-map("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move down" })
-map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
-map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move down" })
-map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
-map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
-map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
+-- Move Lines (Alt + j/k)
+map("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
+map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
+map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move line down" })
+map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move line up" })
+map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move selection down" })
+map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
 
--- Buffers
+-- Better scrolling (center cursor)
+map("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+
+-- ============================================================================
+-- Buffer Management
+-- ============================================================================
 map("n", "<S-h>", function()
   if vim.fn.exists(":BufferLineCyclePrev") == 2 then
     vim.cmd("BufferLineCyclePrev")
@@ -85,7 +103,10 @@ map("n", "<leader>bD", function()
   require("mini.bufremove").delete(0, true)
 end, { desc = "Delete buffer (force)" })
 
--- Tabs
+-- ============================================================================
+-- Tab Management
+-- ============================================================================
+
 map("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
 map("n", "<leader><tab>f", "<cmd>tabfirst<cr>", { desc = "First Tab" })
 map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
@@ -97,16 +118,24 @@ map("n", "<C-PageDown>", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "gt", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "gT", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
+-- ============================================================================
+-- Search & Replace
+-- ============================================================================
+
 -- Clear search with <esc>
 map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsearch" })
 
--- Better search (LazyVim style)
+-- Better search navigation (LazyVim style)
 map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next search result" })
 map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result" })
 map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next search result" })
 map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev search result" })
 map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev search result" })
 map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev search result" })
+
+-- ============================================================================
+-- Editing Helpers
+-- ============================================================================
 
 -- Save file
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save file" })
@@ -118,8 +147,12 @@ map({ "n", "v" }, "<C-S-v>", '"+p', { desc = "Paste from system clipboard" })
 map("i", "<C-S-v>", '<C-r>+', { desc = "Paste from system clipboard" })
 
 -- Better indenting
-map("v", "<", "<gv")
-map("v", ">", ">gv")
+map("v", "<", "<gv", { desc = "Indent left" })
+map("v", ">", ">gv", { desc = "Indent right" })
+
+-- ============================================================================
+-- Plugin Management & Files
+-- ============================================================================
 
 -- Lazy
 map("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
@@ -127,13 +160,17 @@ map("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
 -- New file
 map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
 
--- Search (LazyVim style)
+-- Search files (Telescope)
 map("n", "<leader><space>", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
 map("n", "<leader>sw", "<cmd>Telescope live_grep<cr>", { desc = "Search Word" })
 map("n", "<leader>sb", "<cmd>Telescope buffers<cr>", { desc = "Search Buffers" })
 map("n", "<leader>sk", "<cmd>Telescope keymaps<cr>", { desc = "Search Keymaps" })
 
--- Git (using gitsigns)
+-- ============================================================================
+-- Git Integration
+-- ============================================================================
+
+-- Lazygit
 map("n", "<leader>gg", function()
   if vim.fn.executable("lazygit") == 1 then
     require("toggleterm.terminal").Terminal:new({
@@ -144,17 +181,25 @@ map("n", "<leader>gg", function()
   else
     vim.notify("Lazygit not found", vim.log.levels.WARN)
   end
-end, { desc = "Lazygit (toggleterm)" })
+end, { desc = "Lazygit" })
+
+-- Git blame
 map("n", "<leader>Gb", "<cmd>Gitsigns blame_line<cr>", { desc = "Git Blame" })
 map("n", "<leader>GB", function()
   require("gitsigns").blame_line({ full = true })
 end, { desc = "Git Blame (full)" })
+
+-- Git diff
 map("n", "<leader>Gd", "<cmd>Gitsigns diffthis<cr>", { desc = "Git Diff" })
 map("n", "<leader>GD", function()
   require("gitsigns").diffthis("~")
 end, { desc = "Git Diff (~)" })
+
+-- Hunk navigation
 map("n", "]h", "<cmd>Gitsigns next_hunk<cr>", { desc = "Next Hunk" })
 map("n", "[h", "<cmd>Gitsigns prev_hunk<cr>", { desc = "Prev Hunk" })
+
+-- Hunk operations
 map("n", "<leader>hs", "<cmd>Gitsigns stage_hunk<cr>", { desc = "Stage Hunk" })
 map("n", "<leader>hr", "<cmd>Gitsigns reset_hunk<cr>", { desc = "Reset Hunk" })
 map("v", "<leader>hs", ":Gitsigns stage_hunk<cr>", { desc = "Stage Hunk" })
@@ -165,19 +210,22 @@ map("n", "<leader>hR", "<cmd>Gitsigns reset_buffer<cr>", { desc = "Reset Buffer"
 map("n", "<leader>hp", "<cmd>Gitsigns preview_hunk<cr>", { desc = "Preview Hunk" })
 map("n", "<leader>hd", "<cmd>Gitsigns diffthis<cr>", { desc = "Diff This" })
 
--- Quit
-map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
+-- ============================================================================
+-- Session Management
+-- ============================================================================
 
--- Sessions (auto-session)
--- Commands provided by rmagatti/auto-session: SessionSave/SessionRestore/SessionDelete
+map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
 map("n", "<leader>qS", "<cmd>SessionSave<cr>", { desc = "Save session" })
 map("n", "<leader>qs", "<cmd>SessionRestore<cr>", { desc = "Restore session" })
 map("n", "<leader>qD", "<cmd>SessionDelete<cr>", { desc = "Delete session" })
 map("n", "<leader>qQ", function()
-  -- one-off quit without saving the session
   vim.g.auto_session_enabled = false
   vim.cmd("qa")
 end, { desc = "Quit without saving session" })
+
+-- ============================================================================
+-- LSP & Diagnostics
+-- ============================================================================
 
 -- Highlights under cursor
 map("n", "<leader>ui", vim.show_pos, { desc = "Inspect Pos" })
@@ -229,7 +277,7 @@ map("n", "]w", close_floating_and_goto_diagnostic(vim.diagnostic.goto_next, { se
 map("n", "[w", close_floating_and_goto_diagnostic(vim.diagnostic.goto_prev, { severity = vim.diagnostic.severity.WARN }),
   { desc = "Prev Warning" })
 
--- Additional LSP keymaps (LazyVim style)
+-- Additional LSP keymaps
 map("n", "gD", vim.lsp.buf.declaration, { desc = "Goto Declaration" })
 map("n", "<leader>cR", function()
   local old_name = vim.fn.expand("<cword>")
@@ -237,9 +285,12 @@ map("n", "<leader>cR", function()
   if new_name ~= "" and new_name ~= old_name then
     vim.lsp.buf.rename(new_name)
   end
-end, { desc = "Rename File" })
+end, { desc = "Rename symbol" })
 
--- Toggle options (LazyVim style)
+-- ============================================================================
+-- UI Toggle Options (inspired by AstroNvim)
+-- ============================================================================
+
 map("n", "<leader>us", "<cmd>setlocal spell!<cr>", { desc = "Toggle Spelling" })
 map("n", "<leader>uw", "<cmd>set wrap!<cr>", { desc = "Toggle Word Wrap" })
 map("n", "<leader>ud", function()
@@ -265,25 +316,15 @@ map("n", "<leader>uh", function()
 end, { desc = "Toggle Inlay Hints" })
 map("n", "<leader>uT", "<cmd>TSToggle highlight<cr>", { desc = "Toggle Treesitter Highlight" })
 
--- LazyVim-style window management
+-- Additional window management keymaps
 map("n", "<leader>ww", "<C-W>p", { desc = "Other window" })
-map("n", "<leader>wd", "<C-W>c", { desc = "Delete window" })
 map("n", "<leader>w-", "<C-W>s", { desc = "Split window below" })
 map("n", "<leader>w|", "<C-W>v", { desc = "Split window right" })
 
--- Better search navigation
-map("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
-map("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+-- ============================================================================
+-- Terminal Integration
+-- ============================================================================
 
--- Spell checking
-map("n", "]s", "]s", { desc = "Next Spelling Error" })
-map("n", "[s", "[s", { desc = "Prev Spelling Error" })
-map("n", "z=", "z=", { desc = "Spelling Suggestions" })
-map("n", "zg", "zg", { desc = "Add to Dictionary" })
-map("n", "zw", "zw", { desc = "Mark as Bad Word" })
-
--- Terminal (handled by toggleterm plugin)
--- Additional terminal keymaps
 map("t", "<esc><esc>", "<c-\\><c-n>", { desc = "Enter Normal Mode" })
 map("n", "<leader>ft", function()
   if pcall(require, "toggleterm") then
@@ -300,4 +341,14 @@ map("n", "<leader>fT", function()
   end
 end, { desc = "Terminal (horizontal)" })
 
--- Rust keymaps are defined in rust.lua plugin configuration
+-- ============================================================================
+-- Spell Checking
+-- ============================================================================
+
+map("n", "]s", "]s", { desc = "Next Spelling Error" })
+map("n", "[s", "[s", { desc = "Prev Spelling Error" })
+map("n", "z=", "z=", { desc = "Spelling Suggestions" })
+map("n", "zg", "zg", { desc = "Add to Dictionary" })
+map("n", "zw", "zw", { desc = "Mark as Bad Word" })
+
+-- Note: Language-specific keymaps (Rust, TypeScript, etc.) are in their respective plugin files

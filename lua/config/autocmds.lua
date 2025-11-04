@@ -1,10 +1,24 @@
+-- Utility function to create augroups
 local function augroup(name)
-  return vim.api.nvim_create_augroup("lazyvim_" .. name, { clear = true })
+  return vim.api.nvim_create_augroup("custom_" .. name, { clear = true })
 end
+
+-- Buffer validation helper (from AstroNvim)
+local function is_valid_buffer(bufnr)
+  bufnr = bufnr or 0
+  return vim.api.nvim_buf_is_valid(bufnr)
+    and vim.bo[bufnr].buflisted
+    and vim.bo[bufnr].buftype ~= "nofile"
+end
+
+-- ============================================================================
+-- File Operations & Checktime
+-- ============================================================================
 
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
+  desc = "Check if buffers changed on editor focus",
   callback = function()
     if vim.o.buftype ~= "nofile" then
       vim.cmd("checktime")
@@ -12,17 +26,37 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   end,
 })
 
--- Highlight on yank
+-- Auto create directories when saving a file
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = augroup("auto_create_dir"),
+  desc = "Automatically create parent directories if they don't exist when saving a file",
+  callback = function(event)
+    if event.match:match("^%w%w+:[\\/][\\/]") then
+      return
+    end
+    local file = vim.uv.fs_realpath(event.match) or event.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+  end,
+})
+
+-- ============================================================================
+-- UI Enhancements
+-- ============================================================================
+
+-- Highlight yanked text
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = augroup("highlight_yank"),
+  desc = "Highlight yanked text",
+  pattern = "*",
   callback = function()
-    vim.highlight.on_yank()
+    (vim.hl or vim.highlight).on_yank({ timeout = 200 })
   end,
 })
 
 -- Resize splits if window got resized
-vim.api.nvim_create_autocmd({ "VimResized" }, {
+vim.api.nvim_create_autocmd("VimResized", {
   group = augroup("resize_splits"),
+  desc = "Resize splits if window got resized",
   callback = function()
     local current_tab = vim.fn.tabpagenr()
     vim.cmd("tabdo wincmd =")
@@ -30,16 +64,21 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
   end,
 })
 
+-- ============================================================================
+-- Restore Cursor & File Settings
+-- ============================================================================
+
 -- Go to last loc when opening a buffer
 vim.api.nvim_create_autocmd("BufReadPost", {
-  group = augroup("last_loc"),
+  group = augroup("restore_cursor"),
+  desc = "Restore last cursor position when opening a file",
   callback = function(event)
-    local exclude = { "gitcommit" }
+    local exclude = { "gitcommit", "gitrebase" }
     local buf = event.buf
-    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].last_loc_restored then
       return
     end
-    vim.b[buf].lazyvim_last_loc = true
+    vim.b[buf].last_loc_restored = true
     local mark = vim.api.nvim_buf_get_mark(buf, '"')
     local lcount = vim.api.nvim_buf_line_count(buf)
     if mark[1] > 0 and mark[1] <= lcount then
@@ -48,9 +87,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
+-- ============================================================================
+-- Smart Window Management
+-- ============================================================================
+
 -- Close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("close_with_q"),
+  desc = "Make q close help, man, quickfix, and other special windows",
   pattern = {
     "PlenaryTestPopup",
     "help",
@@ -81,21 +125,55 @@ vim.api.nvim_create_autocmd("FileType", {
       else
         vim.cmd("close")
       end
-    end, { buffer = event.buf, silent = true })
+    end, { buffer = event.buf, silent = true, desc = "Close window" })
 
     -- For quickfix windows, also close when entering a reference with <CR>
     if vim.tbl_contains({ "qf" }, vim.bo[event.buf].filetype) then
       vim.keymap.set("n", "<CR>", function()
-        -- Get the line under cursor and jump to it
-        local line = vim.api.nvim_get_current_line()
         local row = vim.api.nvim_win_get_cursor(0)[1]
-
-        -- Use the built-in quickfix command to jump
         vim.cmd(row .. "cc")
-
-        -- Close quickfix window after jumping
         vim.cmd("cclose")
-      end, { buffer = event.buf, silent = true })
+      end, { buffer = event.buf, silent = true, desc = "Jump to item and close" })
+    end
+  end,
+})
+
+-- Unlist quickfix buffers
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("unlist_quickfix"),
+  desc = "Unlist quickfix buffers",
+  pattern = "qf",
+  callback = function()
+    vim.opt_local.buflisted = false
+  end,
+})
+
+-- Auto-quit if only special windows are left (inspired by AstroNvim)
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = augroup("auto_quit"),
+  desc = "Quit Neovim if more than one window is open and only sidebar windows are list",
+  callback = function()
+    local wins = vim.api.nvim_tabpage_list_wins(0)
+    if #wins == 1 then
+      return
+    end
+    local sidebar_fts = { aerial = true, ["neo-tree"] = true, ["NvimTree"] = true }
+    for _, winid in ipairs(wins) do
+      if vim.api.nvim_win_is_valid(winid) then
+        local bufnr = vim.api.nvim_win_get_buf(winid)
+        local filetype = vim.bo[bufnr].filetype
+        -- If any visible windows are not sidebars, early return
+        if not sidebar_fts[filetype] then
+          return
+        else
+          sidebar_fts[filetype] = nil
+        end
+      end
+    end
+    if #vim.api.nvim_list_tabpages() > 1 then
+      vim.cmd.tabclose()
+    else
+      vim.cmd.qall()
     end
   end,
 })
@@ -115,16 +193,19 @@ vim.api.nvim_create_autocmd("FileType", {
 --   end,
 -- })
 
+-- ============================================================================
+-- File Type Specific Settings
+-- ============================================================================
+
 -- Wrap and check for spell in text filetypes
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("wrap_spell"),
-  pattern = { "gitcommit", "markdown" },
+  desc = "Enable wrap and spell check for text files",
+  pattern = { "gitcommit", "markdown", "text" },
   callback = function()
     vim.opt_local.wrap = true
     vim.opt_local.spell = true
     -- Defer opening folds to ensure it runs after session restore and treesitter parsing
-    -- Open all folds in the same buffer that triggered the event.
-    -- Use normal! to avoid invoking plugin mappings (e.g. neo-tree maps 'z').
     local buf = vim.api.nvim_get_current_buf()
     vim.schedule(function()
       if vim.api.nvim_buf_is_valid(buf) then
@@ -136,21 +217,10 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Auto create dir when saving a file
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-  group = augroup("auto_create_dir"),
-  callback = function(event)
-    if event.match:match("^%w%w+:[\\/][\\/]") then
-      return
-    end
-    local file = vim.uv.fs_realpath(event.match) or event.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
-  end,
-})
-
 -- Rust-specific autocmds
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("rust_settings"),
+  desc = "Set Rust-specific options",
   pattern = "rust",
   callback = function()
     -- Set tab width to 4 for Rust (standard)
@@ -158,15 +228,13 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.shiftwidth = 4
     vim.opt_local.softtabstop = 4
     vim.opt_local.expandtab = true
-
-    -- Format on save disabled for better performance
-    -- Use <leader>fm to format manually when needed
   end,
 })
 
 -- Cargo.toml specific settings
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("cargo_settings"),
+  desc = "Enable crates.nvim keymaps for Cargo.toml",
   pattern = "toml",
   callback = function()
     local filename = vim.fn.expand("%:t")
@@ -191,15 +259,35 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Terminal settings (disable line numbers, etc.)
+if vim.fn.has("nvim-0.11") ~= 1 then
+  vim.api.nvim_create_autocmd("TermOpen", {
+    group = augroup("terminal_settings"),
+    desc = "Disable line number/fold column/sign column for terminals",
+    callback = function()
+      vim.opt_local.number = false
+      vim.opt_local.relativenumber = false
+      vim.opt_local.foldcolumn = "0"
+      vim.opt_local.signcolumn = "no"
+    end,
+  })
+end
+
+-- ============================================================================
+-- Plugin Integration
+-- ============================================================================
+
 -- Auto-open Neo-tree when opening a directory
 vim.api.nvim_create_autocmd("VimEnter", {
   group = augroup("neotree_autoopen"),
+  desc = "Open Neo-tree when opening a directory",
   callback = function()
     local arg = vim.fn.argv(0)
     if arg and vim.fn.isdirectory(arg) == 1 then
-      -- We're opening a directory, so open neo-tree and show it
       vim.schedule(function()
-        require("neo-tree.command").execute({ action = "show", dir = arg })
+        pcall(function()
+          require("neo-tree.command").execute({ action = "show", dir = arg })
+        end)
       end)
     end
   end,

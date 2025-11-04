@@ -65,7 +65,7 @@ return {
       "hrsh7th/cmp-nvim-lsp",
     },
     opts = {
-      -- options for vim.diagnostic.config()
+      -- options for vim.diagnostic.config() (enhanced from AstroNvim)
       diagnostics = {
         underline = true,
         update_in_insert = false,
@@ -82,6 +82,15 @@ return {
             [vim.diagnostic.severity.HINT] = " ",
             [vim.diagnostic.severity.INFO] = " ",
           },
+        },
+        -- Floating window configuration (from AstroNvim)
+        float = {
+          focused = false,
+          style = "minimal",
+          border = "rounded",
+          source = true,
+          header = "",
+          prefix = "",
         },
       },
       -- Enable this to enable the builtin LSP inlay hints on Neovim >= 0.10.0
@@ -133,7 +142,18 @@ return {
       },
     },
     config = function(_, opts)
-      -- setup diagnostics
+      -- Setup LSP handlers for hover and signature help (from AstroNvim)
+      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+        border = "rounded",
+        silent = true,
+      })
+      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+        border = "rounded",
+        silent = true,
+        focusable = false,
+      })
+
+      -- Setup diagnostics
       for name, icon in pairs(opts.diagnostics.signs.text) do
         name = "DiagnosticSign" .. name
         vim.fn.sign_define(name, { text = icon, texthl = name, numhl = "" })
@@ -144,7 +164,7 @@ return {
           callback = function(args)
             local buffer = args.buf
             local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client.supports_method("textDocument/inlayHint") then
+            if client and client.supports_method("textDocument/inlayHint") then
               vim.lsp.inlay_hint.enable(true, { bufnr = buffer })
             end
           end,
