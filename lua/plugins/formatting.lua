@@ -1,8 +1,29 @@
 return {
+  -- Ensure formatters are installed via Mason
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "mason.nvim" },
+    cmd = { "MasonToolsInstall", "MasonToolsUpdate" },
+    opts = {
+      ensure_installed = {
+        "stylua",      -- Lua formatter
+        "shfmt",       -- Shell formatter
+        "prettier",    -- JS/TS/JSON/YAML/Markdown formatter
+        "black",       -- Python formatter
+        "isort",       -- Python import sorter
+        "goimports",   -- Go import formatter
+        "gofmt",       -- Go formatter
+        "rustfmt",     -- Rust formatter
+      },
+      auto_update = false,
+      run_on_start = true,
+    },
+  },
+
   -- Formatting
   {
     "stevearc/conform.nvim",
-    dependencies = { "mason.nvim" },
+    dependencies = { "mason.nvim", "mason-tool-installer.nvim" },
     lazy = true,
     cmd = "ConformInfo",
     keys = {

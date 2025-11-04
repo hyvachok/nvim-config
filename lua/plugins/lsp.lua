@@ -6,9 +6,8 @@ return {
     build = ":MasonUpdate",
     opts = {
       ensure_installed = {
-        "stylua",
-        "shfmt",
-        "prettier",
+        -- Note: formatters like stylua, shfmt, prettier should be managed by conform.nvim
+        -- Only list non-LSP tools that aren't formatters here
         "typescript-language-server",
         "eslint_d",
       },

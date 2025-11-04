@@ -48,15 +48,16 @@ return {
         icon = {
           folder_closed = "",
           folder_open = "",
-          folder_empty = "󰜌",
+          folder_empty = "",
           default = "󰈙",
         },
         modified = {
           symbol = "",
         },
         name = {
-          trailing_slash = false,
+          trailing_slash = true,
           use_git_status_colors = true,
+          highlight = "NeoTreeFileName",
         },
         git_status = {
           symbols = {
@@ -200,6 +201,12 @@ return {
     },
     config = function(_, opts)
       require("neo-tree").setup(opts)
+
+      -- Настройка цветов для лучшего различия директорий и файлов
+      vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { bold = true, fg = "#7aa2f7" })
+      vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon", { fg = "#7aa2f7" })
+      vim.api.nvim_set_hl(0, "NeoTreeFileName", { fg = "#c0caf5" })
+      vim.api.nvim_set_hl(0, "NeoTreeFileIcon", { fg = "#9ece6a" })
     end,
   },
 
@@ -249,5 +256,22 @@ return {
     end,
   },
 
+  -- Tmux navigation
+  {
+    "aserowy/tmux.nvim",
+    event = "VeryLazy",
+    opts = {
+      copy_sync = {
+        enable = true,
+        redirect_to_clipboard = false,
+      },
+      navigation = {
+        enable_default_keybindings = true,
+      },
+      resize = {
+        enable_default_keybindings = true,
+      },
+    },
+  },
 
 }
